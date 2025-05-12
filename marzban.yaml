@@ -1,0 +1,61 @@
+- name: Install Marzban
+  hosts: all
+  become: yes
+  vars:
+    user_password: "{{ user_password }}"  
+  tasks:
+    - name: Install required system packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - git
+        state: present
+        update_cache: yes
+
+    - name: Add Docker’s official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: Install Docker Engine
+      apt:
+        name: docker-ce
+        update_cache: yes
+        state: latest
+
+    - name: Get Installation script
+      get_url:
+        url: https://github.com/Gozargah/Marzban-scripts/raw/master/marzban.sh
+        dest: /tmp/marzban.sh
+        mode: '0755'
+
+    - name: Run Marzban install script with automated inputs in background
+      expect:
+        command: bash /tmp/marzban.sh install --database mysql
+        responses:
+          'Enter the password for the marzban user.*': "{{ user_password }}"
+          'Do you want to override the previous installation.*': 'y'
+        timeout: null
+      no_log: false
+      async: 1200  # Run the task in the background for 5 mins
+      poll: 0
+    
+    - name: Wait for Marzban container to start
+      shell: docker logs marzban-marzban-1 2>&1 | grep -q "Application startup complete."
+      register: marzban_started
+      retries: 30
+      delay: 10
+      until: marzban_started.rc == 0
+
+    - name: Confirm Marzban application has started
+      debug:
+        msg: "Marzban application has successfully started!"
