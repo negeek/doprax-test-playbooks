@@ -1,16 +1,16 @@
-- name: Deploy LuckySweeper game
+- name: Deploy  game_name
   hosts: all
   become: yes
   vars:
     luanti_image: lscr.io/linuxserver/luanti:latest
-    luanti_container_name: luckysweeper
-    luanti_data_dir: /opt/luanti/luckysweeper/data
-    game_url: https://content.luanti.org/packages/xenonca/luckysweeper/download/
+    luanti_container_name: game_name
+    luanti_data_dir: /opt/luanti/game_name/data
+    game_url: https://content.luanti.org/packages/game_developer_name/game_name/download/
     puid: "1000"
     pgid: "1000"
     port: "30000"
     timezone: Etc/UTC
-    gameid: game_id
+    gameid: gameid
 
   tasks:
     - name: Install required system packages
