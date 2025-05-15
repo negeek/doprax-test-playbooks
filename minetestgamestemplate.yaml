@@ -10,7 +10,7 @@
     pgid: "1000"
     port: "30000"
     timezone: Etc/UTC
-    gameid: luckysweeper
+    gameid: game_id
 
   tasks:
     - name: Install required system packages
